@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import fetch from 'node-fetch';
 import Web3 from 'web3';
-import abi from './abi.json' assert {type: "json"};
+import abi from './abi.json' assert {type: 'json'};
 import {} from 'dotenv/config'
 
 var tokenInfo;
@@ -42,12 +42,9 @@ const fileExists = async path => !!(await fs.stat(path).catch(e => false));
 
 const createResultsFolder = async symbol => {
   const path = `./results/${symbol}`;
-  if(!await fileExists(path)) {
-    await fs.mkdir(path);
-  }
+  await fs.mkdir(path, { recursive: true });
   return path;
 };
-
 
 const getJSON = async n => {
   const uri = `${tokenInfo.baseURI}${n}.json`;
@@ -74,13 +71,15 @@ const recursiveGet = async tokens => {
 const main = async () => {
   tokenInfo = await getTokenInfo();
   console.log(tokenInfo);
+  tokenInfo.resultsFolder = await createResultsFolder(tokenInfo.symbol);
+  
+  //override start and end if you want a different range
   const startToken = Number(tokenInfo.totalSupply) + 1; //start at the first unminted token
   const endToken = Number(tokenInfo.maxSupply);
-  tokenInfo.resultsFolder = await createResultsFolder(tokenInfo.symbol);
-  //create array containing numbers from start to end
+  //create array containing numbers from start to end (2 possible ways)
   // const tokens = [...Array(endToken - startToken).keys()].map(x => x + startToken);
-  //a nicer way
   const tokens = Array.from({length: endToken - startToken + 1}, (_, i) => i + startToken);
+  //get metadata files recursively, to compensate for IPFS socket errors
   await recursiveGet(tokens);
 };
 

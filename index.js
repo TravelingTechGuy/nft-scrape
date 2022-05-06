@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import fetch from 'node-fetch';
 import Web3 from 'web3';
 import abi from './abi.json' assert {type: 'json'};
-import {} from 'dotenv/config'
+import {} from 'dotenv/config';
 
 var tokenInfo;
 
